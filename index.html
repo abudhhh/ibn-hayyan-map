@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>خريطة الاستهداف الاستراتيجي - مركز ابن حيان المويلح</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#0f172a;color:#e2e8f0}
+header{background:linear-gradient(135deg,#0f766e,#134e4a);padding:14px 16px;text-align:center}
+header h1{font-size:1.15rem;margin-bottom:3px}
+header p{font-size:.8rem;opacity:.92}
+#map{height:calc(100vh - 92px);width:100%}
+.legend{background:rgba(15,23,42,.94);padding:12px 14px;border-radius:12px;border:1px solid #334155;font-size:12.5px;color:#e2e8f0;min-width:200px}
+.legend h4{color:#5eead4;margin-bottom:8px;border-bottom:1px solid #334155;padding-bottom:6px}
+.legend-item{display:flex;align-items:center;gap:8px;margin:5px 0}
+.legend-swatch{width:18px;height:12px;border-radius:3px;border:1.5px solid #fff}
+.legend-dot{width:14px;height:14px;border-radius:50%;border:2px solid #fff}
+.popup-content{direction:rtl;text-align:right;min-width:230px;font-family:inherit}
+.popup-content h3{color:#0f766e;margin-bottom:6px;border-bottom:2px solid #5eead4;padding-bottom:4px}
+.target{background:#f0fdfa;padding:6px 10px;border-radius:6px;margin:8px 0;color:#134e4a;font-weight:600}
+.services{background:#ecfdf5;padding:8px 10px;border-radius:6px;color:#134e4a;font-size:12.5px}
+.clinic-marker{background:#0f766e;border:3px solid #fff;border-radius:50%;width:18px;height:18px;box-shadow:0 0 0 5px rgba(15,118,110,.35)}
+.info-box{position:absolute;bottom:14px;left:10px;z-index:1000;background:rgba(15,23,42,.94);padding:10px 12px;border-radius:10px;border:1px solid #334155;font-size:12px;max-width:240px;color:#94a3b8}
+</style>
+</head>
+<body>
+<header>
+<h1>خريطة الاستهداف الاستراتيجي</h1>
+<p>مركز ابن حيان الطبي – فرع المويلح | الجادة · الزاهية · الممشى · مسار · المدينة الجامعية</p>
+</header>
+<div id="map"></div>
+<div class="info-box"><strong style="color:#5eead4">تعليمات:</strong><br>انقر المنطقة الملونة لعرض الفئة والخدمات. من أعلى اليسار بدّل إلى صور الأقمار.</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const clinicCenter=[25.3100,55.4600];
+const map=L.map('map',{center:clinicCenter,zoom:13});
+const streets=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'});
+const satellite=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'© Esri'});
+streets.addTo(map);
+L.control.layers({'خريطة الشوارع':streets,'صور الأقمار':satellite},null,{position:'topleft'}).addTo(map);
+const zones=[
+{name:'مجمع الجادة (Aljada)',color:'#0ea5e9',areaNote:'حدود المشروع فقط',distance:'حوالي 1.6 كم شرق الفرع',target:'العائلات الشابة والمهنيون',services:'جلدية وتجميل • أسنان تجميلية • باقات الحمل • فحوصات تنفيذية',hub:[25.3184,55.4743],polygon:[[25.3236,55.4678],[25.3242,55.4756],[25.3234,55.4818],[25.3202,55.4830],[25.3164,55.4818],[25.3138,55.4786],[25.3132,55.4730],[25.3144,55.4686],[25.3186,55.4672]]},
+{name:'مجمع الزاهية (Al Zahia)',color:'#8b5cf6',areaNote:'المجتمع المسوّر فقط',distance:'حوالي 0.8 كم غرب الفرع',target:'سكان الفلل الفاخرة',services:'تجميل وليزر • فحوصات تنفيذية • باقات العائلة • أسنان تجميلي',hub:[25.3155,55.4549],polygon:[[25.3188,55.4496],[25.3192,55.4544],[25.3180,55.4578],[25.3152,55.4586],[25.3116,55.4578],[25.3094,55.4548],[25.3090,55.4508],[25.3106,55.4480],[25.3144,55.4474],[25.3174,55.4482]]},
+{name:'مجمع الممشى (Al Mamsha)',color:'#ec4899',areaNote:'حدود مشروع ألف فقط',distance:'حوالي 0.9 كم شرق الفرع',target:'المهنيون والعائلات الشابة',services:'جلدية وتجميل • أسنان • ليزر • باقات الحمل • فحوصات تنفيذية',hub:[25.3077,55.4677],polygon:[[25.3102,55.4654],[25.3104,55.4694],[25.3090,55.4704],[25.3066,55.4702],[25.3052,55.4688],[25.3050,55.4662],[25.3064,55.4650],[25.3086,55.4648]]},
+{name:'مجمع مسار (Masaar)',color:'#f59e0b',areaNote:'المجتمع المسوّر فقط',distance:'حوالي 14 كم شرق الفرع',target:'النخبة ورجال الأعمال',services:'فحوصات VIP • تجميل • باقات رجال الأعمال • برامج العافية',hub:[25.2597,55.5947],polygon:[[25.2652,55.5878],[25.2658,55.5944],[25.2646,55.5998],[25.2610,55.6018],[25.2562,55.6014],[25.2526,55.5984],[25.2516,55.5932],[25.2530,55.5884],[25.2578,55.5866],[25.2624,55.5868]]},
+{name:'المدينة الجامعية',color:'#10b981',areaNote:'الحرم الأكاديمي فقط',distance:'حوالي 2 كم جنوب شرق الفرع',target:'الأكاديميون والموظفون',services:'فحوصات دورية • طب الأسرة • باقات الحمل • أسنان وجلدية',hub:[25.2992,55.4784],polygon:[[25.3108,55.4724],[25.3120,55.4820],[25.3114,55.4928],[25.3076,55.4968],[25.3018,55.4976],[25.2954,55.4942],[25.2922,55.4870],[25.2918,55.4782],[25.2946,55.4728],[25.3012,55.4712],[25.3072,55.4716]]}
+];
+zones.forEach(z=>{
+ const poly=L.polygon(z.polygon,{color:z.color,fillColor:z.color,fillOpacity:.28,weight:2.5}).addTo(map);
+ poly.bindPopup('<div class="popup-content"><h3>'+z.name+'</h3><p>'+z.areaNote+' — '+z.distance+'</p><div class="target">🎯 '+z.target+'</div><div class="services"><strong>الخدمات:</strong><br>'+z.services+'</div></div>',{maxWidth:320});
+ L.circleMarker(z.hub,{radius:6,color:'#fff',weight:2,fillColor:z.color,fillOpacity:1}).addTo(map);
+});
+L.marker(clinicCenter,{icon:L.divIcon({className:'clinic-marker',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map)
+ .bindPopup('<div class="popup-content"><h3>🏥 مركز ابن حيان الطبي</h3><p>فرع المويلح – تجارية المويلح</p></div>');
+const legend=L.control({position:'bottomright'});
+legend.onAdd=function(){const d=L.DomUtil.create('div','legend');d.innerHTML='<h4>المجمعات</h4><div class="legend-item"><div class="legend-swatch" style="background:#0ea5e9"></div>الجادة</div><div class="legend-item"><div class="legend-swatch" style="background:#8b5cf6"></div>الزاهية</div><div class="legend-item"><div class="legend-swatch" style="background:#ec4899"></div>الممشى</div><div class="legend-item"><div class="legend-swatch" style="background:#f59e0b"></div>مسار</div><div class="legend-item"><div class="legend-swatch" style="background:#10b981"></div>المدينة الجامعية</div><div class="legend-item"><div class="legend-dot" style="background:#0f766e"></div>المركز</div>';return d};
+legend.addTo(map);
+const b=L.latLngBounds([clinicCenter]);
+zones.forEach(z=>z.polygon.forEach(p=>b.extend(p)));
+map.fitBounds(b,{padding:[40,40]});
+</script>
+</body>
+</html>
